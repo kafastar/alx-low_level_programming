@@ -11,7 +11,8 @@
  * Description: This function initializes the members of a struct dog with
  *              the provided values.
  */
-void init_dog(struct dog *d, char *name, float age, char *owner) {
+void init_dog(struct dog *d, char *name, float age, char *owner)
+{
 	if (d != NULL)
 	{
 		d->name = name;
