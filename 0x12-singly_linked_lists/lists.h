@@ -25,6 +25,9 @@ size_t list_len(const list_t *h);
 /* Function prototype for add_node */
 list_t *add_node(list_t **head, const char *str);
 
+/* Function prototype for add_node_end */
+list_t *add_node_end(list_t **head, const char *str);
+
 #endif /* LISTS_H */
 
 
