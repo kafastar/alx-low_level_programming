@@ -22,5 +22,8 @@ listint_t *add_nodeint(listint_t **head, const int n);
 /* Function prototypes */
 listint_t *add_nodeint_end(listint_t **head, const int n);
 
+/* Function prototypes */
+void free_listint(listint_t *head);
+
 #endif /* LISTS_H */
 
