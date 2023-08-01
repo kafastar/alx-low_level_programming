@@ -9,14 +9,13 @@
  */
 size_t print_listint(const listint_t *h)
 {
-	size_t node_count = 0; /* Initialize the counter for the number of nodes. */
+	size_t n = 0;
 
-	while (h != NULL) /* Traverse the list until (NULL is encountered). */
+	while (h != NULL)
 	{
-		printf("%d\n", h->n); /* Print the integer value of the current node. */
-		h = h->next; /* Move to the next node in the list. */
-		node_count++; /* Increment the node counter. */
+		printf("%d\n", h->n);
+		h = h->next;
+		n++;
 	}
-
-	return (node_count); /* Return the total number of nodes in the list. */
+	return (n);
 }
