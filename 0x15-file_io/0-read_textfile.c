@@ -1,50 +1,51 @@
 #include "main.h"
 
 /**
- * read_textfile - Reads and prints a text file to stdout
- * @filename: The name of the file to read
- * @letters: The number of letters to read and print
+ * read_textfile - Reads a text file and prints it to stdout
+ * @filename: Name of the file
+ * @letters: Number of letters to read and print
  *
- * Return: The actual number of letters read and printed, or 0 on failure
+ * Return: The actual number of letters read and printed, or 0 if the file
+ *         could not be opened or read
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-    int fd;
-    ssize_t bytes_read, bytes_written;
-    char *buffer;
+	int fd;
+	ssize_t ret;
+	char *buf;
 
-    if (filename == NULL)
-        return (0);
+	if (filename == NULL)
+		return (0);
 
-    fd = open(filename, O_RDONLY);
-    if (fd == -1)
-        return (0);
+	buf = malloc(sizeof(char) * letters);
+	if (buf == NULL)
+		return (0);
 
-    buffer = malloc(sizeof(char) * letters);
-    if (buffer == NULL)
-    {
-        close(fd);
-        return (0);
-    }
+	fd = open(filename, O_RDONLY);
+	if (fd == -1)
+	{
+		free(buf);
+		return (0);
+	}
 
-    bytes_read = read(fd, buffer, letters);
-    if (bytes_read == -1)
-    {
-        close(fd);
-        free(buffer);
-        return (0);
-    }
+	ret = read(fd, buf, letters);
+	if (ret == -1)
+	{
+		free(buf);
+		close(fd);
+		return (0);
+	}
 
-    bytes_written = write(STDOUT_FILENO, buffer, bytes_read);
-    if (bytes_written == -1 || bytes_written != bytes_read)
-    {
-        close(fd);
-        free(buffer);
-        return (0);
-    }
+	if (write(STDOUT_FILENO, buf, ret) == -1)
+	{
+		free(buf);
+		close(fd);
+		return (0);
+	}
 
-    close(fd);
-    free(buffer);
+	free(buf);
+	if (close(fd) == -1)
+		return (0);
 
-    return (bytes_written);
+	return (ret);
 }
