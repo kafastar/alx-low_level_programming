@@ -1,110 +1,58 @@
+#include "elf.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
 
-#define BUF_SIZE 128
-
-void print_magic(unsigned char *e_ident);
-void print_class(unsigned char e_ident);
-void print_data(unsigned char e_ident);
-void print_version(unsigned char e_ident);
-void print_os_abi(unsigned char e_ident);
-void print_abi_version(unsigned char e_ident);
-
+/**
+ * main - Displays information contained in the ELF header
+ * @argc: Argument count
+ * @argv: Argument vector
+ *
+ * Return: Always 0 (Success)
+ */
 int main(int argc, char *argv[])
 {
-    int fd;
-    ssize_t bytes_read;
-    unsigned char e_ident[16];
+	Elf64_Ehdr header;
+	int fd;
 
-    if (argc != 2)
-    {
-        fprintf(stderr, "Usage: %s elf_filename\n", argv[0]);
-        exit(98);
-    }
+	if (argc != 2)
+	{
+		fprintf(stderr, "Usage: %s elf_filename\n", argv[0]);
+		exit(EXIT_FAILURE);
+	}
 
-    fd = open(argv[1], O_RDONLY);
-    if (fd == -1)
-    {
-        fprintf(stderr, "Error: Cannot open %s\n", argv[1]);
-        exit(98);
-    }
+	fd = open(argv[1], O_RDONLY);
+	if (fd == -1)
+	{
+		fprintf(stderr, "Error: Can't open file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
+	}
 
-    bytes_read = read(fd, e_ident, sizeof(e_ident));
-    if (bytes_read == -1)
-    {
-        fprintf(stderr, "Error: Cannot read from %s\n", argv[1]);
-        close(fd);
-        exit(98);
-    }
+	if (read(fd, &header, EI_NIDENT) != EI_NIDENT)
+	{
+		fprintf(stderr, "Error: Can't read file %s\n", argv[1]);
+		exit(EXIT_FAILURE);
+	}
 
-    printf("ELF Header:\n");
-    print_magic(e_ident);
-    print_class(e_ident[4]);
-    print_data(e_ident[5]);
-    print_version(e_ident[6]);
-    print_os_abi(e_ident[7]);
-    print_abi_version(e_ident[8]);
+	printf("ELF Header:\n");
+	printf("  Magic: %02x %02x %02x %02x\n", header.e_ident[EI_MAG0],
+	       header.e_ident[EI_MAG1], header.e_ident[EI_MAG2],
+	       header.e_ident[EI_MAG3]);
 
-    close(fd);
-    return 0;
-}
+	printf("  Class: %s\n", header.e_ident[EI_CLASS] == ELFCLASS64 ? "ELF64" : "ELF32");
+	printf("  Data: %s\n", header.e_ident[EI_DATA] == ELFDATA2LSB ? "2's complement, little endian" :
+	       "2's complement, big endian");
+	printf("  Version: %d\n", header.e_ident[EI_VERSION]);
+	printf("  OS/ABI: %s\n", header.e_ident[EI_OSABI]);
 
-void print_magic(unsigned char *e_ident)
-{
-    int i;
-    printf("  Magic:   ");
-    for (i = 0; i < 16; i++)
-        printf("%02x%c", e_ident[i], (i == 15) ? '\n' : ' ');
-}
+	printf("  Type: %s\n",
+	       header.e_type == ET_EXEC ? "Executable file" :
+	       header.e_type == ET_DYN ? "Shared object file" :
+	       header.e_type == ET_CORE ? "Core file" : "");
 
-void print_class(unsigned char e_ident)
-{
-    printf("  Class:                             ");
-    switch (e_ident)
-    {
-        case 1: printf("ELF32\n"); break;
-        case 2: printf("ELF64\n"); break;
-        default: printf("<unknown>\n");
-    }
-}
+	printf("  Machine: %d\n", header.e_machine);
+	printf("  Version: %d\n", header.e_version);
 
-void print_data(unsigned char e_ident)
-{
-    printf("  Data:                              ");
-    switch (e_ident)
-    {
-        case 1: printf("2's complement, little endian\n"); break;
-        case 2: printf("2's complement, big endian\n"); break;
-        default: printf("<unknown>\n");
-    }
-}
+	close(fd);
 
-void print_version(unsigned char e_ident)
-{
-    printf("  Version:                           ");
-    if (e_ident == 1)
-        printf("1 (current)\n");
-    else
-        printf("<unknown>\n");
-}
-
-void print_os_abi(unsigned char e_ident)
-{
-    printf("  OS/ABI:                            ");
-    switch (e_ident)
-    {
-        case 0: printf("UNIX - System V\n"); break;
-        case 1: printf("HP-UX\n"); break;
-        case 2: printf("NetBSD\n"); break;
-        /* ... (other cases) */
-        default: printf("<unknown>\n");
-    }
-}
-
-void print_abi_version(unsigned char e_ident)
-{
-    printf("  ABI Version:                       ");
-    printf("%d\n", e_ident);
+	return (0);
 }
